@@ -41,4 +41,14 @@ class IOSpec extends munit.FunSuite {
 
   }
 
+  test("unhandled errors") {
+
+    val run = IO
+      .raiseError[String](new RuntimeException("boom"))
+
+    interceptMessage[RuntimeException]("boom") {
+      run.unsafeRunSync()
+    }
+  }
+
 }

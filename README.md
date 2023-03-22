@@ -1,6 +1,7 @@
 # Chapter 3
 
-The goal of this chapter is to add the `raiseError` and `handleErrorWith` operations.
+The goal of this chapter is to add the `raiseError` and `handleErrorWith`
+operations. The following tests should pass:
 
 ```scala
 test("handle errors") {
@@ -10,5 +11,15 @@ test("handle errors") {
 
   assertEquals(run.unsafeRunSync(), "boom")
 
+}
+
+test("unhandled errors") {
+
+   val run = IO
+     .raiseError[String](new RuntimeException("boom"))
+
+   interceptMessage[RuntimeException]("boom") {
+     run.unsafeRunSync()
+   }
 }
 ```
