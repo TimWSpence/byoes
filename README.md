@@ -1,6 +1,18 @@
 # Build your own effect system
 
-This is a course designed to help you build an effect system in Scala that is similar to [Cats Effect](https://typelevel.org/cats-effect/). The intention is that by building it yourself you should gain a deeper understanding of how an `IO` action is evaluated and the impact of things like blocking, timers, async execution on the performance of your application. The assumption is that you are familiar with using a library like Cats Effect so usage of an effect system is not explained.
+This is a course designed to help you build an effect system in Scala that is
+similar to [Cats Effect](https://typelevel.org/cats-effect/). The intention is
+that by building it yourself you should gain a deeper understanding of how an
+`IO` action is evaluated and the impact of things like blocking, timers, async
+execution on the performance of your application. The assumption is that you
+are familiar with using a library like Cats Effect so usage of an effect system
+is not explained.
+
+The intention is that by the end you should be able to understand the majority
+of the
+[`IOFiber`](https://github.com/typelevel/cats-effect/blob/series/3.x/core/shared/src/main/scala/cats/effect/IOFiber.scala)
+implementation and have at least a high-level understanding of the design of
+the work-stealing threadpool.
 
 ## How to use
 
