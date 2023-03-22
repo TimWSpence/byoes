@@ -1,1 +1,1 @@
-//> using dep "org.scalameta::munit::0.7.27"
+//> using dep "org.scalameta::munit::0.7.29"

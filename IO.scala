@@ -1,3 +1,5 @@
+import scala.annotation.tailrec
+
 enum IO[+A]:
   case Pure(a: A)
   case Delay(thunk: () => A)
@@ -9,12 +11,29 @@ enum IO[+A]:
 
   def >>[B >: A](iob: => IO[B]): IO[B] = flatMap(_ => iob)
 
-  def unsafeRunSync(): A = this match
-    case Pure(a)      => a
-    case Delay(thunk) => thunk()
-    case FlatMap(ioa, f) =>
-      val a = ioa.unsafeRunSync()
-      f(a).unsafeRunSync()
+  def unsafeRunSync(): A =
+    var conts: List[Any => Any] = Nil
+
+    def go(io: IO[Any]): Any = io match
+      case Pure(a) =>
+        conts match
+          case Nil => a
+          case f :: rest =>
+            conts = rest
+            val next = f(a).asInstanceOf[IO[Any]]
+            go(next)
+      case Delay(thunk) =>
+        conts match
+          case Nil => thunk()
+          case f :: rest =>
+            conts = rest
+            val next = f(thunk()).asInstanceOf[IO[Any]]
+            go(next)
+      case FlatMap(io, f) =>
+        conts = f.asInstanceOf[Any => Any] :: conts
+        go(io)
+
+    go(this).asInstanceOf[A]
 
 object IO:
   import IO.*

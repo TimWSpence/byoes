@@ -24,7 +24,8 @@ class IOSpec extends munit.FunSuite {
 
   test("stack safe") {
 
-    def go(n: Int): IO[Unit] = if (n == 1) IO.unit else IO.unit.flatMap(_ => go(n-1))
+    def go(n: Int): IO[Unit] =
+      if (n == 1) IO.unit else IO.unit.flatMap(_ => go(n - 1))
 
     go(20000).unsafeRunSync()
 
