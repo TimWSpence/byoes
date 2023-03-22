@@ -18,6 +18,20 @@ the work-stealing threadpool.
 
 The course is divided into chapters which should iteratively build on top of each other. Each chapter has its own git branch. The goal of that chapter will be described in the corresponding `README.md`. If you get stuck then you can consult `hints.md` for some guidance. If you're really stuck then you can look at the source code, which is a possible solution for that chapter.
 
+## Chapters
+
+NB: Only the first 3 chapters are implemented thus far.
+
+* Chapter 1 - basic "free" monad with suspension of synchronous effects (`SyncIO`)
+* Chapter 2 - stack safety
+* Chapter 3 - error handling
+* Chapter 4 - Fixed threadpool runtime
+* Chapter 5 - Cede / auto-cede
+* Chapter 6 - Async
+* Chapter 7 - Timers / sleep
+* Chapter 8 - `evalOn` / `blocking`
+* Chapter 9 - cancelation? (this may just be too hard)
+
 ## Running the provided solutions
 
 The solutions are built with [scala-cli](https://scala-cli.virtuslab.org). To
