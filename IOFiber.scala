@@ -31,7 +31,9 @@ class IOFiber[A](
       }
 
     def cede(io: IO[Any]): Unit =
+      // Save the currently evaluating IO
       current = io
+      // Re-submit to give the EC a chance to schedule a different fiber
       initialEC.execute(this)
 
     @tailrec
