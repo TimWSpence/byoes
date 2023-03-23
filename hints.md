@@ -1,9 +1,7 @@
 # Hints
 
-You will probably need to introduce an `IOFiber extends Runnable` which will
-encapsulate the state of the running `IO` action. The recursive pattern-matching
-that previously lived in `IO#unsafeRunSync()` will move to the `IOFiber#run`
-method.  As the execution of fibers is now asynchronous, we will also need a way
-to report  the result of the `IO` action to the callsite. The simplest way is to
-pass a `cb: Outcome[A] => Unit` to the `IOFiber` constructor. It can then invoke
-this callback when it has finished running the `IO` action.
+Once again, we are adding a new primitive in `cede` so that means a new data
+constructor for `IO`. When we pattern match on this in our runloop, we need to
+stop executing. This will mean saving our current fiber execution state and
+re-submitting our fiber to the threadpool to allow it to potentially schedule a
+different fiber.
