@@ -1,6 +1,9 @@
 package io.github.timwspence.byoes
 
 import unsafe.implicits.given
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import scala.concurrent.ExecutionContext
 
 class IOSpec extends munit.FunSuite {
 
@@ -53,6 +56,21 @@ class IOSpec extends munit.FunSuite {
     interceptMessage[RuntimeException]("boom") {
       run.unsafeRunSync()
     }
+  }
+
+  test("auto-ceding") {
+    val pool = Executors.newSingleThreadExecutor()
+    given IORuntime = IORuntime(ExecutionContext.fromExecutor(pool))
+
+    lazy val forever: IO[Unit] = IO.unit >> forever
+    forever.unsafeToFuture()
+
+    val run = IO.unit
+    // If we didn't auto-cede then this would never get to run
+    assertEquals(run.unsafeRunSync(), ())
+
+    pool.shutdown()
+    pool.awaitTermination(5, TimeUnit.SECONDS)
   }
 
 }
