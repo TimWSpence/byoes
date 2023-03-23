@@ -1,3 +1,7 @@
+package io.github.timwspence.byoes
+
+import unsafe.implicits.given
+
 class IOSpec extends munit.FunSuite {
 
   test("pure") {
