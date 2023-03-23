@@ -25,13 +25,16 @@ enum IO[+A]:
     var conts: List[Any => Any] = Nil
     var tags: List[Byte] = Nil
 
+    def unwindStackTill(target: Byte): Unit =
+      while (!tags.isEmpty && tags.head != target) {
+        tags = tags.tail
+        conts = conts.tail
+      }
+
     @tailrec
     def go(io: IO[Any]): Any = io match
       case Pure(a) =>
-        while (!tags.isEmpty && tags.head != flatMapT) {
-          tags = tags.tail
-          conts = conts.tail
-        }
+        unwindStackTill(flatMapT)
         conts match
           case Nil => a
           case f :: rest =>
@@ -40,10 +43,7 @@ enum IO[+A]:
             val next = f(a).asInstanceOf[IO[Any]]
             go(next)
       case Delay(thunk) =>
-        while (!tags.isEmpty && tags.head != flatMapT) {
-          tags = tags.tail
-          conts = conts.tail
-        }
+        unwindStackTill(flatMapT)
         conts match
           case Nil => thunk()
           case f :: rest =>
@@ -60,10 +60,7 @@ enum IO[+A]:
         tags = handleErrorT :: tags
         go(io)
       case RaiseError(e) =>
-        while (!tags.isEmpty && tags.head != handleErrorT) {
-          tags = tags.tail
-          conts = conts.tail
-        }
+        unwindStackTill(handleErrorT)
         conts match
           case Nil => throw e
           case f :: rest =>
