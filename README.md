@@ -2,12 +2,13 @@
 
 Up until now, we have been evaluating `IO` actions on the thread calling
 `unsafeRunSync`. This will become problematic when we come to implement fiber
-forking - we are effectively creating a 1-1 correspondence between fibers and
-threads. Rather, we would like our `IO` actions to be submitted to a threadpool
-so that we an schedule many `IO` actions (fibers) on a fixed size threadpool
-The high-level design we are ultimately aiming towards is described in great
-detail [here](https://tokio.rs/blog/2019-10-scheduler) and at least a brief
-skim of that now is probably beneficial.
+forking - where does the forked fiber get run? We are also effectively creating
+a 1-1 correspondence between fibers and threads. Rather, we would like our `IO`
+actions to be submitted to a threadpool so that we an schedule many `IO` actions
+(fibers) on a fixed size threadpool The high-level design we are ultimately
+aiming towards is described in great detail
+[here](https://tokio.rs/blog/2019-10-scheduler) and at least a brief skim of
+that now is probably beneficial.
 
 The goal of this chapter is to introduce a fixed size threadpool (we will
 customize this in the future but for now you can use
