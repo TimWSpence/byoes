@@ -33,10 +33,10 @@ NB: Only the first 3 chapters are implemented thus far.
 * Chapter 1 - basic "free" monad with suspension of synchronous effects (`SyncIO`)
 * Chapter 2 - stack safety
 * Chapter 3 - error handling
-* Chapter 4 - forking fibers
-* Chapter 5 - fixed threadpool runtime
-* Chapter 6 - cede / auto-cede
-* Chapter 7 - async
+* Chapter 4 - fixed threadpool runtime
+* Chapter 5 - cede / auto-cede
+* Chapter 6 - async
+* Chapter 7 - forking fibers
 * Chapter 8 - timers / sleep
 * Chapter 9 - `evalOn` / `blocking`
 * Chapter 10 - cancelation? (this may just be too hard)
