@@ -16,7 +16,15 @@ the work-stealing threadpool.
 
 ## How to use
 
-The course is divided into chapters which should iteratively build on top of each other. Each chapter has its own git branch. The goal of that chapter will be described in the corresponding `README.md`. If you get stuck then you can consult `hints.md` for some guidance. If you're really stuck then you can look at the source code, which is a possible solution for that chapter.
+The course is divided into chapters which should iteratively build on top of
+each other. Each chapter has its own git branch. The goal of that chapter will
+be described in the corresponding `README.md`. If you get stuck then you can
+consult `hints.md` for some guidance. If you're really stuck then you can look
+at the source code, which is a possible solution for that chapter.
+
+The task description in the README is left deliberately open-ended to encourage
+you to explore possible solutions but the provided solutions will be similar to
+what Cats Effect does (albeit simplified).
 
 ## Chapters
 
