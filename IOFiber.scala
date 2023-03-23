@@ -77,8 +77,7 @@ class IOFiber[A](
                 val next = f(e).asInstanceOf[IO[Any]]
                 go(next, iters + 1)
           case Cede =>
-            current = io
-            initialEC.execute(this)
+            cede(io)
 
     var result: Outcome[A] = null
     try {
