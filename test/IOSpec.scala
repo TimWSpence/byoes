@@ -87,4 +87,18 @@ class IOSpec extends munit.FunSuite {
     assertEquals(run.unsafeRunSync(), ())
   }
 
+  test("continuation after async") {
+    val run = IO
+      .async[Int] { cb =>
+        IO.delay {
+          Future {
+            cb(Right(1))
+          }
+        }.void
+      }
+      .map(_ + 1)
+
+    assertEquals(run.unsafeRunSync(), 2)
+  }
+
 }

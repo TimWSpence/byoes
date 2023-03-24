@@ -92,6 +92,7 @@ class IOFiber[A](
                     current = IO.raiseError(e)
                     initialEC.execute(this)
             val next = run(cb)
+            // TODO This is probably buggy as the IO that sets up the cb will inherit our continuation stack
             go(next, iters + 1)
 
     var result: Outcome[A] = null
