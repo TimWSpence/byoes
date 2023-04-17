@@ -51,6 +51,14 @@ class IOFiber[A](
         acquire.set(false)
         ()
 
+      def pushStack(tag: Byte, f: Any => Any): Unit =
+        tags = tag :: tags
+        conts = f :: conts
+
+      def popStack(): Unit =
+        tags = tags.tail
+        conts = conts.tail
+
       @tailrec
       def go(io: IO[Any], iters: Int): Any =
         if (iters == autoCedeThreshold) cede(io)
@@ -64,8 +72,7 @@ class IOFiber[A](
                   if (tags.head == asyncReturnT) {
                     endAsyncRegistration()
                   } else {
-                    conts = rest
-                    tags = tags.tail
+                    popStack()
                     val next = f(a).asInstanceOf[IO[Any]]
                     go(next, iters + 1)
                   }
@@ -77,18 +84,15 @@ class IOFiber[A](
                   if (tags.head == asyncReturnT) {
                     endAsyncRegistration()
                   } else {
-                    conts = rest
-                    tags = tags.tail
+                    popStack()
                     val next = f(thunk()).asInstanceOf[IO[Any]]
                     go(next, iters + 1)
                   }
             case FlatMap(io, f) =>
-              conts = f.asInstanceOf[Any => Any] :: conts
-              tags = flatMapT :: tags
+              pushStack(flatMapT, f.asInstanceOf[Any => Any])
               go(io, iters + 1)
             case HandleErrorWith(io, f) =>
-              conts = f.asInstanceOf[Any => Any] :: conts
-              tags = handleErrorT :: tags
+              pushStack(handleErrorT, f.asInstanceOf[Any => Any])
               go(io, iters + 1)
             case RaiseError(e) =>
               unwindStackTill(handleErrorT)
@@ -99,8 +103,7 @@ class IOFiber[A](
                     // TODO what are the semantics of an unhandled error in async registration?
                     endAsyncRegistration()
                   } else {
-                    conts = rest
-                    tags = tags.tail
+                    popStack()
                     val next = f(e).asInstanceOf[IO[Any]]
                     go(next, iters + 1)
                   }
@@ -123,8 +126,7 @@ class IOFiber[A](
                       current = IO.raiseError(e)
                       initialEC.execute(this)
                       acquire.set(false)
-              conts = asyncReturn :: conts
-              tags = asyncReturnT :: tags
+              pushStack(asyncReturnT, asyncReturn)
               val next = run(callback)
               go(next, iters + 1)
 
