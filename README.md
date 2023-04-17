@@ -30,7 +30,7 @@ what Cats Effect does (albeit simplified).
 
 ## Chapters
 
-NB: Only the first 3 chapters are implemented thus far.
+NB: Only the first 6 chapters are implemented thus far.
 
 * Chapter 1 - basic "free" monad with suspension of synchronous effects (`SyncIO`)
 * Chapter 2 - stack safety
