@@ -45,6 +45,12 @@ class IOFiber[A](
         // Re-submit to give the EC a chance to schedule a different fiber
         initialEC.execute(this)
 
+      def endAsyncRegistration(): Unit =
+        conts = conts.tail
+        tags = tags.tail
+        acquire.set(false)
+        ()
+
       @tailrec
       def go(io: IO[Any], iters: Int): Any =
         if (iters == autoCedeThreshold) cede(io)
@@ -56,10 +62,7 @@ class IOFiber[A](
                 case Nil => succeeded(a)
                 case f :: rest =>
                   if (tags.head == asyncReturnT) {
-                    conts = conts.tail
-                    tags = tags.tail
-                    acquire.set(false)
-                    ()
+                    endAsyncRegistration()
                   } else {
                     conts = rest
                     tags = tags.tail
@@ -72,10 +75,7 @@ class IOFiber[A](
                 case Nil => succeeded(thunk())
                 case f :: rest =>
                   if (tags.head == asyncReturnT) {
-                    conts = conts.tail
-                    tags = tags.tail
-                    acquire.set(false)
-                    ()
+                    endAsyncRegistration()
                   } else {
                     conts = rest
                     tags = tags.tail
@@ -96,11 +96,8 @@ class IOFiber[A](
                 case Nil => errored(e)
                 case f :: rest =>
                   if (tags.head == asyncReturnT) {
-                    conts = conts.tail
-                    tags = tags.tail
-                    acquire.set(false)
                     // TODO what are the semantics of an unhandled error in async registration?
-                    ()
+                    endAsyncRegistration()
                   } else {
                     conts = rest
                     tags = tags.tail
