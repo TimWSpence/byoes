@@ -45,6 +45,9 @@ class IOFiber[A](
         // Re-submit to give the EC a chance to schedule a different fiber
         initialEC.execute(this)
 
+      // We de-limit async registration regions on the stack via a
+      // special marker tag. When unwinding the stack to find the next
+      // continuation, you should not unwind past one of these markers
       def endAsyncRegistration(): Unit =
         conts = conts.tail
         tags = tags.tail
@@ -55,9 +58,11 @@ class IOFiber[A](
         tags = tag :: tags
         conts = f :: conts
 
-      def popStack(): Unit =
+      def popStack(): Any => Any =
+        val f = conts.head
         tags = tags.tail
         conts = conts.tail
+        f
 
       @tailrec
       def go(io: IO[Any], iters: Int): Any =
@@ -68,11 +73,11 @@ class IOFiber[A](
               unwindStackTill(flatMapT)
               conts match
                 case Nil => succeeded(a)
-                case f :: rest =>
+                case _ =>
                   if (tags.head == asyncReturnT) {
                     endAsyncRegistration()
                   } else {
-                    popStack()
+                    val f = popStack()
                     val next = f(a).asInstanceOf[IO[Any]]
                     go(next, iters + 1)
                   }
@@ -80,11 +85,11 @@ class IOFiber[A](
               unwindStackTill(flatMapT)
               conts match
                 case Nil => succeeded(thunk())
-                case f :: rest =>
+                case _ =>
                   if (tags.head == asyncReturnT) {
                     endAsyncRegistration()
                   } else {
-                    popStack()
+                    val f = popStack()
                     val next = f(thunk()).asInstanceOf[IO[Any]]
                     go(next, iters + 1)
                   }
@@ -98,12 +103,12 @@ class IOFiber[A](
               unwindStackTill(handleErrorT)
               conts match
                 case Nil => errored(e)
-                case f :: rest =>
+                case _ =>
                   if (tags.head == asyncReturnT) {
                     // TODO what are the semantics of an unhandled error in async registration?
                     endAsyncRegistration()
                   } else {
-                    popStack()
+                    val f = popStack()
                     val next = f(e).asInstanceOf[IO[Any]]
                     go(next, iters + 1)
                   }
