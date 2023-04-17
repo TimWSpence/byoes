@@ -24,7 +24,7 @@ class IOFiber[A](
   // This tracks the IO we are currently executing. Necessary for maintaining
   // state when we are de-scheduled due to a cede or async boundary
   private var current: IO[Any] = initial
-  private var conts: List[Any => Any] = Nil
+  private var stack: List[Any => Any] = Nil
   private var tags: List[Byte] = Nil
 
   def run(): Unit =
@@ -40,7 +40,7 @@ class IOFiber[A](
           !tags.isEmpty && tags.head != target && tags.head != asyncReturnT
         ) {
           tags = tags.tail
-          conts = conts.tail
+          stack = stack.tail
         }
 
       def cede(io: IO[Any]): Unit =
@@ -54,19 +54,19 @@ class IOFiber[A](
       // special marker tag. When unwinding the stack to find the next
       // continuation, you should not unwind past one of these markers
       def endAsyncRegistration(): Unit =
-        conts = conts.tail
+        stack = stack.tail
         tags = tags.tail
         acquire.set(false)
         ()
 
       def pushStack(tag: Byte, f: Any => Any): Unit =
         tags = tag :: tags
-        conts = f :: conts
+        stack = f :: stack
 
       def popStack(): Any => Any =
-        val f = conts.head
+        val f = stack.head
         tags = tags.tail
-        conts = conts.tail
+        stack = stack.tail
         f
 
       @tailrec
@@ -76,7 +76,7 @@ class IOFiber[A](
           io match
             case Pure(a) =>
               unwindStackTill(flatMapT)
-              conts match
+              stack match
                 case Nil => succeeded(a)
                 case _ =>
                   if (tags.head == asyncReturnT) {
@@ -88,7 +88,7 @@ class IOFiber[A](
                   }
             case Delay(thunk) =>
               unwindStackTill(flatMapT)
-              conts match
+              stack match
                 case Nil => succeeded(thunk())
                 case _ =>
                   if (tags.head == asyncReturnT) {
@@ -106,7 +106,7 @@ class IOFiber[A](
               go(io, iters + 1)
             case RaiseError(e) =>
               unwindStackTill(handleErrorT)
-              conts match
+              stack match
                 case Nil => errored(e)
                 case _ =>
                   if (tags.head == asyncReturnT) {
