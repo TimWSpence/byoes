@@ -14,6 +14,11 @@ class IOFiber[A](
 
   private val autoCedeThreshold: Int = 32
 
+  // Async registration introduces a potential race between
+  // the async registration block and the re-scheduled fiber. Both
+  // operate on the non-atomic mutable internals of the fiber so this
+  // functions effectively as a mutex and functions as a barrier that
+  // ensures the internals are correctly published when the runloop is yielded
   private val acquire = new AtomicBoolean(false)
 
   // This tracks the IO we are currently executing. Necessary for maintaining
