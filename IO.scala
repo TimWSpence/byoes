@@ -21,6 +21,10 @@ enum IO[+A]:
 
   def >>[B >: A](iob: => IO[B]): IO[B] = flatMap(_ => iob)
 
+  def flatTap[B](f: A => IO[B]): IO[A] = flatMap(a => f(a).as(a))
+
+  def as[B](b: => B): IO[B] = map(_ => b)
+
   def handleErrorWith[B >: A](f: Throwable => IO[B]): IO[B] =
     HandleErrorWith(this, f)
 
