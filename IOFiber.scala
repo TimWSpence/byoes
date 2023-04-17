@@ -6,21 +6,21 @@ import scala.concurrent.ExecutionContext
 import java.util.concurrent.atomic.AtomicBoolean
 
 class IOFiber[A](
-    val initial: IO[A],
-    cb: Outcome[A] => Unit,
-    initialEC: ExecutionContext
+    private val initial: IO[A],
+    private val cb: Outcome[A] => Unit,
+    private val initialEC: ExecutionContext
 ) extends Runnable:
   import Constants.*
 
-  val autoCedeThreshold: Int = 32
+  private val autoCedeThreshold: Int = 32
 
-  val acquire = new AtomicBoolean(false)
+  private val acquire = new AtomicBoolean(false)
 
   // This tracks the IO we are currently executing. Necessary for maintaining
   // state when we are de-scheduled due to a cede or async boundary
-  var current: IO[Any] = initial
-  var conts: List[Any => Any] = Nil
-  var tags: List[Byte] = Nil
+  private var current: IO[Any] = initial
+  private var conts: List[Any => Any] = Nil
+  private var tags: List[Byte] = Nil
 
   def run(): Unit =
     import Outcome.*
